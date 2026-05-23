@@ -1,0 +1,11 @@
+# Trivy ignore list - CVEs we have triaged and accepted
+#
+# Format: one CVE ID per line. Lines starting with '#' are comments.
+# Only add a CVE here AFTER:
+#   1. Reading the upstream advisory
+#   2. Confirming the vulnerable code path is NOT exercised in our app
+#   3. Recording a decision (with date + reason) below
+#
+# Example:
+#   # Accepted 2026-05-23 - vulnerable function not called in our code paths
+#   CVE-2024-XXXXX

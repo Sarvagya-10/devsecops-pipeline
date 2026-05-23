@@ -86,6 +86,23 @@ pipeline {
             }
         }
 
+        stage('Trivy filesystem scan') {
+            steps {
+                sh '''#!/bin/bash
+                    set -euo pipefail
+                    echo "=== Trivy fs: scanning workspace for vulnerable deps + secrets + misconfig ==="
+                    trivy fs \
+                        --scanners vuln,secret,misconfig \
+                        --severity HIGH,CRITICAL \
+                        --ignore-unfixed \
+                        --exit-code 1 \
+                        --format table \
+                        --no-progress \
+                        .
+                '''
+            }
+        }
+
         stage('Docker build') {
             steps {
                 dir("${APP_DIR}") {
@@ -103,6 +120,22 @@ pipeline {
                         docker images ${IMAGE_NAME} --format '{{.Repository}}:{{.Tag}}  {{.Size}}  {{.CreatedSince}}'
                     '''
                 }
+            }
+        }
+
+        stage('Trivy image scan') {
+            steps {
+                sh '''#!/bin/bash
+                    set -euo pipefail
+                    echo "=== Trivy image: scanning ${IMAGE_NAME}:${IMAGE_TAG} for OS + lang CVEs ==="
+                    trivy image \
+                        --severity HIGH,CRITICAL \
+                        --ignore-unfixed \
+                        --exit-code 1 \
+                        --format table \
+                        --no-progress \
+                        ${IMAGE_NAME}:${IMAGE_TAG}
+                '''
             }
         }
     }
