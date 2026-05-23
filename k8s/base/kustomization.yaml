@@ -6,9 +6,8 @@ namespace: devsecops
 resources:
   - namespace.yaml
   - configmap.yaml
-  - ../rbac/serviceaccount.yaml
-  - ../rbac/role.yaml
-  - ../rbac/rolebinding.yaml
+  # RBAC bundle (separate Kustomization at k8s/rbac/)
+  - ../rbac
   - deployment.yaml
   - service.yaml
   - hpa.yaml
