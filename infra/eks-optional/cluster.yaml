@@ -1,0 +1,37 @@
+# eksctl cluster config for the one-shot Phase 12 EKS demo.
+#
+# This is INTENTIONALLY minimal and ephemeral:
+#   - 2 small worker nodes (smallest realistic prod-shape)
+#   - default VPC (eksctl creates one for us)
+#   - default node IAM role which auto-includes AmazonEC2ContainerRegistryReadOnly
+#     so ECR pulls work without our imagePullSecret on EKS
+#
+# DELETE THIS CLUSTER AFTER THE DEMO:
+#   eksctl delete cluster --config-file=infra/eks-optional/cluster.yaml --wait
+#
+# Cost while running: ~$0.14/hr (control plane $0.10 + 2 x t3.small $0.04)
+---
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: devsecops-demo
+  region: us-east-1
+  version: "1.30"
+  tags:
+    Project: devsecops-pipeline
+    Phase: "12"
+    Lifecycle: ephemeral
+
+managedNodeGroups:
+  - name: workers
+    instanceType: t3.small
+    desiredCapacity: 2
+    minSize: 2
+    maxSize: 3
+    volumeSize: 20
+    privateNetworking: false
+    labels:
+      role: worker
+    tags:
+      Project: devsecops-pipeline
