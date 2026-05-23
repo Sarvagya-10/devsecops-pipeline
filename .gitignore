@@ -48,3 +48,7 @@ sonar-report.*
 .terraform/
 *.tfstate
 *.tfstate.backup
+
+# Tool/IDE artifacts
+.claude/
+NUL
