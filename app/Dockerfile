@@ -28,12 +28,13 @@ RUN groupadd --system --gid ${APP_GID} ${APP_USER} \
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PATH="/home/appuser/.local/bin:${PATH}" \
+    PATH="/app/.local/bin:${PATH}" \
     APP_HOME=/app
 
 WORKDIR ${APP_HOME}
 
-COPY --from=builder --chown=${APP_USER}:${APP_USER} /root/.local /home/${APP_USER}/.local
+# appuser's $HOME is /app (set via useradd --home-dir), so user-site is /app/.local
+COPY --from=builder --chown=${APP_USER}:${APP_USER} /root/.local /app/.local
 COPY --chown=${APP_USER}:${APP_USER} src/ ./src/
 COPY --chown=${APP_USER}:${APP_USER} wsgi.py ./
 
