@@ -16,10 +16,12 @@ pipeline {
     }
 
     environment {
-        APP_DIR     = 'app'
-        IMAGE_NAME  = 'devsecops-demo'
-        IMAGE_TAG   = "${env.BUILD_NUMBER}"
-        VENV_DIR    = '.venv'
+        APP_DIR        = 'app'
+        IMAGE_NAME     = 'devsecops-demo'
+        IMAGE_TAG      = "${env.BUILD_NUMBER}"
+        VENV_DIR       = '.venv'
+        SONAR_HOST_URL = 'http://172.17.0.1:9000'
+        SONAR_SCANNER  = '/opt/sonar-scanner/bin/sonar-scanner'
     }
 
     stages {
@@ -67,6 +69,19 @@ pipeline {
             post {
                 always {
                     junit allowEmptyResults: false, testResults: "${APP_DIR}/test-results.xml"
+                }
+            }
+        }
+
+        stage('SonarQube SAST') {
+            steps {
+                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                    sh '''#!/bin/bash
+                        set -euo pipefail
+                        ${SONAR_SCANNER} \
+                            -Dsonar.host.url=${SONAR_HOST_URL} \
+                            -Dsonar.token=${SONAR_TOKEN}
+                    '''
                 }
             }
         }
