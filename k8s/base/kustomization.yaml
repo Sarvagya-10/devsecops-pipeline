@@ -6,6 +6,9 @@ namespace: devsecops
 resources:
   - namespace.yaml
   - configmap.yaml
+  - ../rbac/serviceaccount.yaml
+  - ../rbac/role.yaml
+  - ../rbac/rolebinding.yaml
   - deployment.yaml
   - service.yaml
   - hpa.yaml

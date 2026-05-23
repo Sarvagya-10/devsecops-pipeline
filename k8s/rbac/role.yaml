@@ -1,0 +1,23 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: devsecops-demo-role
+  namespace: devsecops
+  labels:
+    app.kubernetes.io/name: devsecops-demo
+rules:
+  # Minimum useful permission set for an app of this shape:
+  # read its own ConfigMap (for hypothetical hot-reload of app settings).
+  # Note: resourceNames limits the rule to ONE specific ConfigMap.
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    resourceNames: ["devsecops-demo-config"]
+    verbs: ["get", "watch"]
+
+  # Self-discovery: an app may want to know which pod it is running in.
+  # 'get' on the single pod whose name matches POD_NAME env (downwards API)
+  # would be the precise scope; here we use a slightly looser 'list' so the
+  # demo works without that wiring. Still scoped to this namespace only.
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list"]

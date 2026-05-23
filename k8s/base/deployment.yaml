@@ -23,6 +23,7 @@ spec:
         app.kubernetes.io/name: devsecops-demo
         app.kubernetes.io/version: "0.1.0"
     spec:
+      serviceAccountName: devsecops-demo-sa
       automountServiceAccountToken: false
       imagePullSecrets:
         - name: ecr-creds
