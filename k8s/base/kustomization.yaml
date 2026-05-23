@@ -17,3 +17,10 @@ resources:
 
 commonLabels:
   app.kubernetes.io/part-of: devsecops-pipeline
+
+# Pin the image to the build the pipeline most recently pushed to ECR.
+# Bump newTag whenever the pipeline produces a build you want to deploy.
+# Avoids reliance on the mutable :latest tag (Sonar rule kubernetes:S6596).
+images:
+  - name: 649966627060.dkr.ecr.us-east-1.amazonaws.com/devsecops-demo
+    newTag: "7"
