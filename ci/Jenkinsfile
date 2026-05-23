@@ -1,0 +1,108 @@
+// =====================================================================
+// DevSecOps CI/CD Pipeline - Declarative Jenkinsfile
+// Phase 4: checkout, test, docker build
+// (Phase 5 adds SonarQube SAST stage, Phase 6 adds Trivy security scan,
+//  Phase 7 adds ECR push, Phase 9 adds Kubernetes deploy)
+// =====================================================================
+
+pipeline {
+    agent any
+
+    options {
+        timestamps()
+        timeout(time: 30, unit: 'MINUTES')
+        buildDiscarder(logRotator(numToKeepStr: '20', artifactNumToKeepStr: '10'))
+        disableConcurrentBuilds()
+        ansiColor('xterm')
+    }
+
+    environment {
+        APP_DIR     = 'app'
+        IMAGE_NAME  = 'devsecops-demo'
+        IMAGE_TAG   = "${env.BUILD_NUMBER}"
+        VENV_DIR    = '.venv'
+    }
+
+    stages {
+
+        stage('Checkout info') {
+            steps {
+                sh '''#!/bin/bash
+                    set -euo pipefail
+                    echo "=== Build #${BUILD_NUMBER} on ${NODE_NAME} ==="
+                    echo "=== Commit ==="
+                    git log --oneline -1
+                    echo ""
+                    echo "=== Workspace contents ==="
+                    ls -la
+                '''
+            }
+        }
+
+        stage('Python setup') {
+            steps {
+                dir("${APP_DIR}") {
+                    sh '''#!/bin/bash
+                        set -euo pipefail
+                        python3 -m venv ${VENV_DIR}
+                        . ${VENV_DIR}/bin/activate
+                        python -m pip install --upgrade pip --quiet
+                        pip install -r requirements-dev.txt --quiet
+                        echo "Installed packages:"
+                        pip list
+                    '''
+                }
+            }
+        }
+
+        stage('Unit tests') {
+            steps {
+                dir("${APP_DIR}") {
+                    sh '''#!/bin/bash
+                        set -euo pipefail
+                        . ${VENV_DIR}/bin/activate
+                        pytest --junit-xml=test-results.xml --cov-report=xml:coverage.xml
+                    '''
+                }
+            }
+            post {
+                always {
+                    junit allowEmptyResults: false, testResults: "${APP_DIR}/test-results.xml"
+                }
+            }
+        }
+
+        stage('Docker build') {
+            steps {
+                dir("${APP_DIR}") {
+                    sh '''#!/bin/bash
+                        set -euo pipefail
+                        docker build \
+                            --pull \
+                            --tag ${IMAGE_NAME}:${IMAGE_TAG} \
+                            --tag ${IMAGE_NAME}:latest \
+                            --label "build.number=${BUILD_NUMBER}" \
+                            --label "build.commit=$(git rev-parse --short HEAD)" \
+                            .
+                        echo ""
+                        echo "=== Image built ==="
+                        docker images ${IMAGE_NAME} --format '{{.Repository}}:{{.Tag}}  {{.Size}}  {{.CreatedSince}}'
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "Build #${env.BUILD_NUMBER} SUCCEEDED. Image: ${IMAGE_NAME}:${IMAGE_TAG}"
+        }
+        failure {
+            echo "Build #${env.BUILD_NUMBER} FAILED. Check stage logs above."
+        }
+        always {
+            // Clean workspace to save disk on t3.micro
+            cleanWs(deleteDirs: true, notFailBuild: true)
+        }
+    }
+}
