@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Virtual envs
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Secrets — NEVER commit
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+aws-credentials*
+kubeconfig
+*.kubeconfig
+
+# Build / scan artifacts
+*.zip
+build/
+dist/
+trivy-report.*
+sonar-report.*
+
+# Local infra state
+.terraform/
+*.tfstate
+*.tfstate.backup
