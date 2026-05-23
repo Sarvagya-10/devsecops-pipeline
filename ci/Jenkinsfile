@@ -22,6 +22,10 @@ pipeline {
         VENV_DIR       = '.venv'
         SONAR_HOST_URL = 'http://172.17.0.1:9000'
         SONAR_SCANNER  = '/opt/sonar-scanner/bin/sonar-scanner'
+        AWS_REGION     = 'us-east-1'
+        AWS_ACCOUNT_ID = '649966627060'
+        ECR_REGISTRY   = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+        ECR_REPO       = "${ECR_REGISTRY}/${IMAGE_NAME}"
     }
 
     stages {
@@ -135,6 +139,39 @@ pipeline {
                         --format table \
                         --no-progress \
                         ${IMAGE_NAME}:${IMAGE_TAG}
+                '''
+            }
+        }
+
+        stage('ECR login') {
+            steps {
+                sh '''#!/bin/bash
+                    set -euo pipefail
+                    echo "=== Logging in to ECR ${ECR_REGISTRY} (IMDS role-based auth) ==="
+                    aws ecr get-login-password --region ${AWS_REGION} \
+                        | docker login --username AWS --password-stdin ${ECR_REGISTRY}
+                '''
+            }
+        }
+
+        stage('ECR push') {
+            steps {
+                sh '''#!/bin/bash
+                    set -euo pipefail
+                    echo "=== Tag image for ECR ==="
+                    docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${ECR_REPO}:${IMAGE_TAG}
+                    docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${ECR_REPO}:latest
+
+                    echo "=== Push ${ECR_REPO}:${IMAGE_TAG} ==="
+                    docker push ${ECR_REPO}:${IMAGE_TAG}
+                    docker push ${ECR_REPO}:latest
+
+                    echo "=== Image in ECR ==="
+                    aws ecr describe-images \
+                        --repository-name ${IMAGE_NAME} \
+                        --region ${AWS_REGION} \
+                        --query 'sort_by(imageDetails,&imagePushedAt)[-3:].{Tags:imageTags,Digest:imageDigest,Size:imageSizeInBytes,Pushed:imagePushedAt}' \
+                        --output table
                 '''
             }
         }
