@@ -211,11 +211,27 @@ Total project AWS spend so far: **under $1**.
 | 11 | Kubernetes RBAC (ServiceAccount/Role/RoleBinding) | ✅ |
 | 12 | One-shot EKS demo (created → deployed → screenshotted → deleted) | ✅ |
 | 13 | Architecture diagram + this README | ✅ |
-| 14 | Resume bullets (separate doc) | pending |
-| 15 | Interview prep Q&A (separate doc) | pending |
+| 14 | Resume bullets — [`docs/resume/bullets.md`](docs/resume/bullets.md) | ✅ |
+| 15 | Interview prep Q&A — [`docs/interview/qa.md`](docs/interview/qa.md) | ✅ |
+
+---
+
+## Documentation map
+
+| Document | What's in it |
+|---|---|
+| [`README.md`](README.md) | This file — recruiter-facing front door |
+| [`docs/architecture/architecture.md`](docs/architecture/architecture.md) | Full diagram + per-component design rationale |
+| [`docs/security/iam-review.md`](docs/security/iam-review.md) | IAM least-privilege per-action justification |
+| [`docs/screenshots/INDEX.md`](docs/screenshots/INDEX.md) | All 27 screenshots — what each one shows |
+| [`docs/resume/bullets.md`](docs/resume/bullets.md) | Pre-written resume / LinkedIn / portfolio text |
+| [`docs/interview/qa.md`](docs/interview/qa.md) | Q&A walkthroughs and "tell me about a time" stories |
+| [`local/README.md`](local/README.md) | Kind cluster execution guide |
+| [`infra/eks-optional/README.md`](infra/eks-optional/README.md) | One-shot EKS demo runbook |
+| [`SECURITY.md`](SECURITY.md) | Vulnerability disclosure policy |
 
 ---
 
 ## License
 
-MIT — see [`LICENSE`](LICENSE) (to be added).
+MIT — see [`LICENSE`](LICENSE).
